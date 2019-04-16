@@ -56,3 +56,35 @@ insert (j,x) Nil                = node Nil (j,x) Nil
 insert (j,x) (Node l _ (k,v) r) | j > k      = balance l (k,v) (insert (j,x) r)
                                 | j < k      = balance (insert (j,x) l) (k,v) r
                                 | otherwise  = node l (k,x) r
+
+delRoot :: Ord k => BTree32 k a -> BTree32 k a
+delRoot (Node Nil _ (k,v) Nil) = Nil
+delRoot (Node l   _ (k,v) r  ) | size l <  size r = node l             (searchMin r) (deleteMin r) 
+                               | size l >= size r = node (deleteMax l) (searchMax l) r
+                               
+
+searchMin :: Ord k => BTree32 k a -> (k,a)
+searchMin (Node Nil _ (k,v) _) = (k,v)
+searchMin (Node l   _ _     _) = searchMin l
+
+deleteMin :: Ord k => BTree32 k a -> BTree32 k a
+deleteMin (Node Nil _ (k,v) Nil) = Nil
+deleteMin (Node Nil _ (k,v) r  ) = r
+deleteMin (Node l   _ (k,v) r  ) = node (deleteMin l) (k,v) r
+
+searchMax :: Ord k => BTree32 k a -> (k,a)
+searchMax (Node _ _ (k,v) Nil) = (k,v) 
+searchMax (Node _ _ _     r  ) = searchMax r 
+
+deleteMax :: Ord k => BTree32 k a -> BTree32 k a
+deleteMax (Node Nil _ (k,v) Nil) = Nil
+deleteMax (Node l   _ (k,v) Nil) = l
+deleteMax (Node l   _ (k,v) r  ) = node l (k,v) (deleteMax r)
+
+delete :: Ord k => k -> BTree32 k a -> BTree32 k a
+delete x Nil                   = Nil 
+delete x t@(Node l _ (k,v) r ) | x == k = delRoot t
+                               | x <  k = node (delete x l) (k,v) r
+                               | x >  k = node l            (k,v) (delete x r)
+
+
