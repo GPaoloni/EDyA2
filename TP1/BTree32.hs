@@ -1,11 +1,11 @@
 module BTree32 where
 
-data BTree32 k a = Nil               --  ́arbol vacío
+data BTree32 k a = Nil               -- árbol vacío
                  | Node
-                   (BTree32 k a)     -- sub ́arbol izquierdo
+                   (BTree32 k a)     -- subárbol izquierdo
                    Int               -- tamaño del árbol
                    (k,a)             -- elemento del nodo
-                   (BTree32 k a)     -- sub ́arbol derecho
+                   (BTree32 k a)     -- subárbol derecho
                    deriving Show
 
 size :: BTree32 k a -> Int
@@ -13,10 +13,10 @@ size Nil            = 0
 size (Node _ n _ _) = n
 
 search :: Ord k => k -> BTree32 k a -> Maybe a
-search _ Nil                 = Nothing
+search _ Nil                = Nothing
 search k (Node l _ (c,x) r) | k == c = Just x
-                             | k <  c = search k l
-                             | otherwise  = search k r
+                            | k <  c = search k l
+                            | k >  c = search k r
 
 -- Contruye un BTree32 Node con la estructura solicitada
 node :: BTree32 k a -> (k,a) -> BTree32 k a -> BTree32 k a
@@ -27,13 +27,17 @@ singleR :: Ord k => BTree32 k a -> (k,a) -> BTree32 k a -> BTree32 k a
 singleR (Node lb _ b rb) a ra = node lb b (node rb a ra)
 
 doubleR :: Ord k => BTree32 k a -> (k,a) -> BTree32 k a -> BTree32 k a
-doubleR (Node lb _ b (Node lc _ c rc)) a ra = node (node lb b lc) c (node rc a ra)
+doubleR (Node lb _ b (Node lc _ c rc)) a ra = node (node lb b lc) 
+                                                   c
+                                                   (node rc a ra)
 
 singleL :: Ord k => BTree32 k a -> (k,a) -> BTree32 k a -> BTree32 k a
 singleL la a (Node lb _ b rb) = node (node la a lb) b rb
 
 doubleL :: Ord k => BTree32 k a -> (k,a) -> BTree32 k a -> BTree32 k a
-doubleL la a (Node (Node lc _ c rc) _ b rb) = node (node la a lc) c (node rc b rb)
+doubleL la a (Node (Node lc _ c rc) _ b rb) = node (node la a lc) 
+                                                   c
+                                                   (node rc b rb)
 
 balance :: Ord k => BTree32 k a -> (k , a) -> BTree32 k a -> BTree32 k a
 balance l (k,v) r | size r + size l <= 1 = node l (k,v) r
@@ -59,8 +63,12 @@ insert (j,x) (Node l _ (k,v) r) | j > k      = balance l (k,v) (insert (j,x) r)
 
 delRoot :: Ord k => BTree32 k a -> BTree32 k a
 delRoot (Node Nil _ (k,v) Nil) = Nil
-delRoot (Node l   _ (k,v) r  ) | size l <  size r = node l             (searchMin r) (deleteMin r) 
-                               | size l >= size r = node (deleteMax l) (searchMax l) r
+delRoot (Node l   _ (k,v) r  ) | size l <  size r = node l             
+                                                         (searchMin r)
+                                                         (deleteMin r) 
+                               | size l >= size r = node (deleteMax l) 
+                                                         (searchMax l) 
+                                                         r
                                
 
 searchMin :: Ord k => BTree32 k a -> (k,a)
@@ -83,8 +91,11 @@ deleteMax (Node l   _ (k,v) r  ) = node l (k,v) (deleteMax r)
 
 delete :: Ord k => k -> BTree32 k a -> BTree32 k a
 delete x Nil                   = Nil 
-delete x t@(Node l _ (k,v) r ) | x == k = delRoot t
-                               | x <  k = node (delete x l) (k,v) r
-                               | x >  k = node l            (k,v) (delete x r)
-
+delete x t@(Node l _ (k,v) r ) | x <  k = balance (delete x l) 
+                                                  (k,v) 
+                                                  r
+                               | x >  k = balance l 
+                                                  (k,v)
+                                                  (delete x r)
+                               | x == k = delRoot t
 
