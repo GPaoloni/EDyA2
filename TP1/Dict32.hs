@@ -1,3 +1,13 @@
+{-
+Implementación de Diccionario.
+Trabajo práctico 1
+
+Integrantes: 
+Gianfranco Paoloni
+Sebastián Zimmermann
+-}
+
+
 module Dict32 where
 import BTree32
 

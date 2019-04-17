@@ -1,3 +1,12 @@
+{-
+Implementación de Binary Search Tree 3-2
+Trabajo práctico 1
+
+Integrantes: 
+Gianfranco Paoloni
+Sebastián Zimmermann
+-}
+
 module BTree32 where
 
 data BTree32 k a = Nil               -- árbol vacío
