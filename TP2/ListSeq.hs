@@ -35,16 +35,21 @@ instance Seq [] where
     scanS f e []  = ([], e)
     scanS f e [x] = ([e], f e x)
     scanS f e s   = let s' = scanS f e $ contract s
-                    in expand s s'
+                        r  = expand s $ fst s'
+                    in (r, snd s')
         where
             contract []       = []
             contract [x]      = [x]
             contract (x:y:xs) = let (h,t) = f x y ||| contract xs
                                 in h:t
-            expand xs (ys, r)   = (completeScan xs ys, r)
-            completeScan [x] ys = ys
-            completeScan xs ys  = tabulateS (\i -> buildIthItem i xs ys) (lengthS xs)
-            buildIthItem i xs ys = if even i
-                                   then nthS ys $ i `div` 2
-                                   else f (nthS ys $ i `div` 2) (nthS xs $ i-1)
+            expand [] ys           = ys
+            expand [_] ys          = ys
+            expand (x:_:xs) (y:ys) = let (z,t) = f y x ||| expand xs ys
+                                     in y:z:t
+            --expand xs (ys, r)   = (completeScan xs ys, r)
+            --completeScan [x] ys = ys
+            --completeScan xs ys  = tabulateS (\i -> buildIthItem i xs ys) (lengthS xs)
+            --buildIthItem i xs ys = if even i
+            --                       then nthS ys $ i `div` 2
+            --                       else f (nthS ys $ i `div` 2) (nthS xs $ i-1)
     fromList = id
