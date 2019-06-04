@@ -5,9 +5,19 @@ import qualified Arr as A
 import Arr ((!))
 
 {--   
-   reduceS    :: (a -> a -> a) -> a -> s a -> a
-   scanS      :: (a -> a -> a) -> a -> s a -> (s a, a)
+  scanS      :: (a -> a -> a) -> a -> s a -> (s a, a)
+  Contract and expand defined at top cause its used in reduce and scan
 --}
+
+contract :: (a -> a -> a) -> (A.Arr a) -> (A.Arr a)
+contract f xs = let half = (lengthS xs + 1) `div` 2  
+                in tabulateS g $ half
+    where n    = lengthS xs
+          half = (n + 1) `div` 2
+          p i  = i < half - 1 || even n
+          g i  = if p i then f (xs ! (2*i)) (xs ! (2*i+1))
+                 else xs ! (2*i)
+
 
 instance Seq A.Arr where
     emptyS       = A.empty
@@ -38,7 +48,7 @@ instance Seq A.Arr where
             0 -> EMPTY
             1 -> ELT $ xs ! 0
             n -> let sz = n `div` 2
-                  (l,r) = takeS xs sz ||| dropS xs sz
+                     (l,r) = takeS xs sz ||| dropS xs sz
                  in NODE l r
     showlS xs = case lengthS xs of 
             0 -> NIL
@@ -46,8 +56,20 @@ instance Seq A.Arr where
     reduceS f e xs = case lengthS xs of
             0 -> e
             1 -> f e $ xs ! 0
-            n -> let
+            _ -> reduceS f e $ contract f xs
 
+{--
+    scanS f e xs = case lengthS xs of 
+            0 -> (emptyS, singletonS e) 
+            1 -> (singletonS e, f e (xs ! 0))
+            n -> let s' = scanS f e $ contract xs
+                     r  = expand s $ fst s'
+                 in (r, snd s')
+        where contract xs = case lenghtS xs of
+            0 -> emptyS
+            1 -> xs
+            n -> 
+--}
 
 
 
