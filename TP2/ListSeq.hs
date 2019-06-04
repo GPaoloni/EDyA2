@@ -46,10 +46,4 @@ instance Seq [] where
             expand [_] ys          = ys
             expand (x:_:xs) (y:ys) = let (z,t) = f y x ||| expand xs ys
                                      in y:z:t
-            --expand xs (ys, r)   = (completeScan xs ys, r)
-            --completeScan [x] ys = ys
-            --completeScan xs ys  = tabulateS (\i -> buildIthItem i xs ys) (lengthS xs)
-            --buildIthItem i xs ys = if even i
-            --                       then nthS ys $ i `div` 2
-            --                       else f (nthS ys $ i `div` 2) (nthS xs $ i-1)
     fromList = id

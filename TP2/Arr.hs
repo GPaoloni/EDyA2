@@ -4,19 +4,18 @@
  Esta puede instalarse utilizando Cabal, ejecutando el siguiente código  
  en un intérprete de comandos: 
  
- $ update cabal
+ $ cabal update
  $ cabal install vector
  
 -}
 
-module Arr (Arr, length, tabulate, (!), subArray, fromList, flatten) where
+module Arr (Arr, empty, length, tabulate, (!), subArray, fromList, flatten) where
 
 import Prelude hiding (length)
 import qualified Data.Vector as V
 import Control.Monad
 
 newtype Arr a = A {getVector ::  V.Vector a }
-
 
 length    :: Arr a -> Int
 length (A p)  = V.length p
