@@ -18,6 +18,13 @@ contract f xs = let half = (lengthS xs + 1) `div` 2
           g i  = if p i then f (xs ! (2*i)) (xs ! (2*i+1))
                  else xs ! (2*i)
 
+expand :: (a -> a -> a) -> (A.Arr a) -> (A.Arr a) ->  (A.Arr a)
+expand f xs s' = case lengthS xs of 
+        0 -> s'
+        1 -> s'
+        n -> tabulateS g n
+    where g i | even i    = s' ! (i `div` 2)
+              | otherwise = f (s' ! (i `div` 2)) (xs ! (i-1))
 
 instance Seq A.Arr where
     emptyS       = A.empty
@@ -57,27 +64,9 @@ instance Seq A.Arr where
             0 -> e
             1 -> f e $ xs ! 0
             _ -> reduceS f e $ contract f xs
-
-{--
-    scanS f e xs = case lengthS xs of 
-            0 -> (emptyS, singletonS e) 
-            1 -> (singletonS e, f e (xs ! 0))
-            n -> let s' = scanS f e $ contract xs
-                     r  = expand s $ fst s'
+    scanS f e xs = case lengthS xs of
+            0 -> (emptyS, e)
+            1 -> (singletonS e, f e $ xs ! 0)
+            _ -> let s' = scanS f e $ contract f xs
+                     r  = expand f xs $ fst s'
                  in (r, snd s')
-        where contract xs = case lenghtS xs of
-            0 -> emptyS
-            1 -> xs
-            n -> 
---}
-
-
-
-
-
-
-
-
-
-
-
